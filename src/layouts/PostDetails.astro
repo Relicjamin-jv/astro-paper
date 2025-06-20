@@ -270,6 +270,38 @@ const nextPost =
   }
   attachCopyButtons();
 
+  /** Attaches a codapi-snippet element for executing code,
+   * only allows executing browser side code. */
+  function attachExecutable() {
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    const engine = {
+      javascript: "browser",
+      lua: "wasi",
+      PHP: "wasi",
+      python: "wasi",
+      ruby: "wasi",
+      sqlite: "wasi",
+    };
+
+    for (const codeBlock of codeBlocks) {
+      const lang = codeBlock.getAttribute("data-language");
+      const executableElement = document.createElement("codapi-snippet");
+
+      console.log(engine[lang]);
+      if (engine[lang] === undefined) {
+        return;
+      }
+
+      executableElement.setAttribute("sandbox", lang);
+      executableElement.setAttribute("editor", "basic");
+      executableElement.setAttribute("engine", engine[lang]);
+      // needs to be implicitly under the <pre> tag
+      codeBlock.insertAdjacentElement("afterend", executableElement);
+    }
+  }
+  attachExecutable();
+
   /** Scrolls the document to the top when
    * the "Back to Top" button is clicked. */
   function backToTop() {
