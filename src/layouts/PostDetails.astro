@@ -165,6 +165,13 @@ const nextPost =
 </Layout>
 
 <script is:inline data-astro-rerun>
+  let pyodideReadyPromise = null;
+  // validates that the the DOM is rendered before loading
+  // the wasm, otherwise it can lock up the DOM.
+  // TODO: use workers.
+  document.addEventListener("DOMContentLoaded", function () {
+    pyodideReadyPromise = loadPyodide();
+  });
   /** Create a progress indicator
    *  at the top */
   function createProgressBar() {
@@ -261,7 +268,7 @@ const nextPost =
       await navigator.clipboard.writeText(text ?? "");
 
       // visual feedback that task is completed
-      button.innerText = "Copied";
+      button.innerHTML = "&#10004;";
 
       setTimeout(() => {
         button.innerText = copyButtonLabel;
@@ -269,6 +276,88 @@ const nextPost =
     }
   }
   attachCopyButtons();
+
+  async function attachExecutable() {
+    await pyodideReadyPromise;
+    const runButtonLabel = "Run";
+    const editButtonLabel = "Edit";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const lang = codeBlock.getAttribute("data-language");
+
+      if (lang !== "python") {
+        return;
+      }
+
+      const runButton = document.createElement("button");
+      runButton.className =
+        "copy-code absolute right-27 -top-3 rounded bg-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
+      runButton.innerHTML = runButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(runButton);
+
+      const editButton = document.createElement("button");
+      editButton.className =
+        "copy-code absolute right-15 -top-3 rounded bg-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
+      editButton.innerHTML = editButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(editButton);
+
+      runButton.addEventListener("click", async () => {
+        await runCode(getCode(codeBlock), runButton, codeBlock);
+        runButton.innerHTML = runButtonLabel;
+      });
+
+      editButton.addEventListener("click", async () => {
+        const codeSpans = Array.from(codeBlock.querySelectorAll("span"));
+        codeSpans.forEach(span => {
+          span.setAttribute("contentEditable", true);
+          span.focus();
+        });
+      });
+    }
+
+    function getCode(codeBlock) {
+      return codeBlock.querySelector("code").innerText;
+    }
+
+    async function runCode(code, button, codeBlock) {
+      button.innerHTML = `<span class="inline-block w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"></span>`;
+      const pyodide = await pyodideReadyPromise;
+      const output = await pyodide.runPythonAsync(code);
+      if (output === undefined) {
+        return;
+      }
+      displayOutput(output, codeBlock);
+    }
+
+    async function displayOutput(output, codeBlock) {
+      let outputElement = document.createElement("pre");
+      outputElement.innerText = `output:\n${output}`;
+
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const exitButton = document.createElement("button");
+      exitButton.className =
+        "copy-code absolute right-3 -top-3 rounded bg-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
+      exitButton.innerHTML = "X";
+      exitButton.setAttribute("tabindex", "0");
+      outputElement.appendChild(exitButton);
+
+      codeBlock.parentNode?.after(outputElement);
+
+      // wrap codebock with relative parent element
+      outputElement?.parentNode?.insertBefore(wrapper, outputElement);
+      wrapper.appendChild(outputElement);
+
+      exitButton.addEventListener("click", async () => {
+        wrapper.remove();
+      });
+    }
+  }
+  attachExecutable();
 
   /** Scrolls the document to the top when
    * the "Back to Top" button is clicked. */

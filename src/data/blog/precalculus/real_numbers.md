@@ -99,3 +99,10 @@ In total there are 6 properties.
 
 Feel free to try out and test a few different numbers for $ a $ and $ b $ to see how
 the properties of negatives work.
+
+```python
+number1 = 1
+number2 = 2
+
+number1 + number2
+```
