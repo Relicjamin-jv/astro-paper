@@ -101,8 +101,25 @@ Feel free to try out and test a few different numbers for $ a $ and $ b $ to see
 the properties of negatives work.
 
 ```python
-number1 = 1
-number2 = 2
+import matplotlib.pyplot as plt
+import numpy as np
 
-number1 + number2
+t = np.linspace(-10, 10, 100)
+sig = 1 / (1 + np.exp(-t))
+
+fig, ax = plt.subplots()
+ax.axhline(y=0, color="black", linestyle="--")
+ax.axhline(y=0.5, color="black", linestyle=":")
+ax.axhline(y=1.0, color="black", linestyle="--")
+ax.axvline(color="grey")
+ax.axline((0, 0.5), slope=0.25, color="black", linestyle=(0, (5, 5)))
+ax.plot(t, sig, linewidth=2, label=r"$\sigma(t) = \frac{1}{1 + e^{-t}}$")
+ax.set(xlim=(-10, 10), xlabel="t")
+ax.legend(fontsize=14)
+
+plt.show()
+```
+
+```python
+1+1
 ```

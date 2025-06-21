@@ -169,9 +169,10 @@ const nextPost =
   // validates that the the DOM is rendered before loading
   // the wasm, otherwise it can lock up the DOM.
   // TODO: use workers.
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", async function () {
     pyodideReadyPromise = loadPyodide();
   });
+
   /** Create a progress indicator
    *  at the top */
   function createProgressBar() {
@@ -278,7 +279,6 @@ const nextPost =
   attachCopyButtons();
 
   async function attachExecutable() {
-    await pyodideReadyPromise;
     const runButtonLabel = "Run";
     const editButtonLabel = "Edit";
     const codeBlocks = Array.from(document.querySelectorAll("pre"));
@@ -318,39 +318,77 @@ const nextPost =
       });
     }
 
+    function isPlot(code) {
+      return code.includes("matplotlib");
+    }
+
     function getCode(codeBlock) {
-      return codeBlock.querySelector("code").innerText;
+      let code = codeBlock.querySelector("code").innerText;
+
+      // we are ouputing and image and dont want pyodide to handle outputting an image
+      if (isPlot(code)) {
+        code = code.replace("plt.show()", "");
+        code += `
+import io
+import base64
+buf = io.BytesIO()
+plt.savefig(buf, format='png')
+buf.seek(0) # Rewind the buffer to the beginning
+plt.close()
+
+# Encode the image data to base64
+image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+image_base64
+      `;
+      }
+
+      return code;
     }
 
     async function runCode(code, button, codeBlock) {
-      button.innerHTML = `<span class="inline-block w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"></span>`;
+      const plot = isPlot(code);
       const pyodide = await pyodideReadyPromise;
+
+      if (plot) {
+        await pyodide.loadPackage("matplotlib");
+      }
+
+      button.innerHTML = `<span class="inline-block w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"></span>`;
       const output = await pyodide.runPythonAsync(code);
       if (output === undefined) {
         return;
       }
-      displayOutput(output, codeBlock);
+      displayOutput(output, codeBlock, plot);
     }
 
-    async function displayOutput(output, codeBlock) {
-      let outputElement = document.createElement("pre");
-      outputElement.innerText = `output:\n${output}`;
+    async function displayOutput(output, codeBlock, plot) {
+      let outputElement = null;
+      if (plot) {
+        outputElement = document.createElement("img");
+        outputElement.src = `data:image/png;base64,${output}`;
+      } else {
+        outputElement = document.createElement("p");
+        outputElement.innerText = `output:\n${output}`;
+      }
 
       const wrapper = document.createElement("div");
       wrapper.style.position = "relative";
+
+      const outputPre = document.createElement("pre");
+      wrapper.appendChild(outputPre);
 
       const exitButton = document.createElement("button");
       exitButton.className =
         "copy-code absolute right-3 -top-3 rounded bg-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
       exitButton.innerHTML = "X";
       exitButton.setAttribute("tabindex", "0");
-      outputElement.appendChild(exitButton);
+      outputPre.appendChild(exitButton);
 
       codeBlock.parentNode?.after(outputElement);
 
       // wrap codebock with relative parent element
       outputElement?.parentNode?.insertBefore(wrapper, outputElement);
-      wrapper.appendChild(outputElement);
+      outputPre.appendChild(outputElement);
 
       exitButton.addEventListener("click", async () => {
         wrapper.remove();
