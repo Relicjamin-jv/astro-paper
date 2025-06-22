@@ -12,8 +12,11 @@ importers:
         specifier: ^4.0.12
         version: 4.0.12
       '@astrojs/sitemap':
-        specifier: ^3.4.1
-        version: 3.4.1
+        specifier: ^3.2.1
+        version: 3.2.1
+      '@astropub/worker':
+        specifier: ^0.2.0
+        version: 0.2.0
       '@resvg/resvg-js':
         specifier: ^2.6.2
         version: 2.6.2
@@ -152,6 +155,9 @@ packages:
 
   '@astrojs/yaml2ts@0.2.2':
     resolution: {integrity: sha512-GOfvSr5Nqy2z5XiwqTouBBpy5FyI6DEe+/g/Mk5am9SjILN1S5fOEvYK0GuWHg98yS/dobP4m8qyqw/URW35fQ==}
+
+  '@astropub/worker@0.2.0':
+    resolution: {integrity: sha512-DkvD+H3N3n9XqRV66Jh3nYq0fPkfPwlbuOcKmLgSINms0z5VcHALVUmneceMJ1ni/MexkqffezWtGgKAiglYbw==}
 
   '@babel/helper-string-parser@7.25.9':
     resolution: {integrity: sha512-4A/SCr/2KLd5jrtOMFzaKjVtAei3+2r/NChoBNoZ3EyP/+GlhoaEGoWOZUmFmoITP7zOJyHIMm+DYRd8o3PvHA==}
@@ -3137,6 +3143,8 @@ snapshots:
   '@astrojs/yaml2ts@0.2.2':
     dependencies:
       yaml: 2.7.0
+
+  '@astropub/worker@0.2.0': {}
 
   '@babel/helper-string-parser@7.25.9': {}
 

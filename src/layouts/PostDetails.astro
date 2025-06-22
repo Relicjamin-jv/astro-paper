@@ -271,3 +271,27 @@ const nextPost =
     window.scrollTo({ left: 0, top: 0, behavior: "instant" })
   );
 </script>
+
+<script>
+  import {asyncRun} from "../utils/worker.ts";
+  const script = `
+      import statistics
+      statistics.stdev(A_rank)
+  `;
+
+  const context = {
+    A_rank: [0.8, 0.4, 1.2, 3.7, 2.6, 5.8],
+  };
+
+  async function main() {
+    const { result, error } = await asyncRun(script, context);
+    if (result) {
+      console.log("pyodideWorker result:", result);
+    } else if (error) {
+      console.log("pyodideWorker error:", error);
+    }
+  }
+
+  main();
+</script>
+
