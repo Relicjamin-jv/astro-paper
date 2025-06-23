@@ -10,7 +10,6 @@ import {
 } from "@shikijs/transformers";
 import { transformerFileName } from "./src/utils/transformers/fileName";
 import { SITE } from "./src/config";
-import worker from "@astropub/worker"
 
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -22,7 +21,6 @@ export default defineConfig({
     sitemap({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),
     }),
-    worker(),
   ],
   markdown: {
     remarkPlugins: [remarkMath, remarkToc, [remarkCollapse, { test: "Table of contents" }]],

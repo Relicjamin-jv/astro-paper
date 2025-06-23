@@ -224,47 +224,15 @@ const nextPost =
   }
   addHeadingLinks();
 
-  /** Attaches copy buttons to code blocks in the document,
-   * allowing users to copy code easily. */
-  function attachCopyButtons() {
-    const copyButtonLabel = "Copy";
-    const codeBlocks = Array.from(document.querySelectorAll("pre"));
-
-    for (const codeBlock of codeBlocks) {
-      const wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
-
-      const copyButton = document.createElement("button");
-      copyButton.className =
-        "copy-code absolute end-3 top-3 rounded bg-muted/80 px-2 py-1 text-xs leading-4 text-foreground font-medium";
-      copyButton.innerHTML = copyButtonLabel;
-      codeBlock.setAttribute("tabindex", "0");
-      codeBlock.appendChild(copyButton);
-
-      // wrap codebock with relative parent element
-      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
-      wrapper.appendChild(codeBlock);
-
-      copyButton.addEventListener("click", async () => {
-        await copyCode(codeBlock, copyButton);
-      });
-    }
-
-    async function copyCode(block, button) {
-      const code = block.querySelector("code");
-      const text = code?.innerText;
-
-      await navigator.clipboard.writeText(text ?? "");
-
-      // visual feedback that task is completed
-      button.innerText = "Copied";
-
-      setTimeout(() => {
-        button.innerText = copyButtonLabel;
-      }, 700);
-    }
+  /** Scrolls the document to the top when
+   * the "Back to Top" button is clicked. */
+  function backToTop() {
+    document.querySelector("#back-to-top")?.addEventListener("click", () => {
+      document.body.scrollTop = 0; // For Safari
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    });
   }
-  attachCopyButtons();
+  backToTop();
 
   /* Go to page start after page swap */
   document.addEventListener("astro:after-swap", () =>
@@ -273,25 +241,119 @@ const nextPost =
 </script>
 
 <script>
-  import {asyncRun} from "../utils/worker.ts";
-  const script = `
-      import statistics
-      statistics.stdev(A_rank)
-  `;
+  import "ace-builds/src-noconflict/ace";
+  import "ace-builds/src-noconflict/theme-twilight";
+  import "ace-builds/src-noconflict/mode-python";
+  import "ace-builds/src-noconflict/ext-language_tools";
+  import { asyncRun } from "../utils/worker.ts";
 
-  const context = {
-    A_rank: [0.8, 0.4, 1.2, 3.7, 2.6, 5.8],
-  };
-
-  async function main() {
+  // runs python and display the result under the codeBlock executing.
+  async function runPython(
+    script: string,
+    codeElement: HTMLElement,
+    context: Record<string, Object> = {}
+  ) {
     const { result, error } = await asyncRun(script, context);
-    if (result) {
-      console.log("pyodideWorker result:", result);
-    } else if (error) {
-      console.log("pyodideWorker error:", error);
+
+    if (error) {
+      alert("Something went wrong with executing the Python script " + error);
+      return;
     }
+
+    const displayElement = createDisplayElement();
+    const preElement = displayElement.querySelector("pre");
+    if (result.includes("base64")) {
+      // img
+      const image = document.createElement("img");
+      image.src = result;
+      preElement?.append(image);
+    } else {
+      const text = document.createElement("p");
+      text.innerText = `result: ${result}`;
+      preElement?.append(text);
+    }
+
+    codeElement.after(displayElement);
   }
 
-  main();
-</script>
+  function createDisplayElement() {
+    const wrapper = document.createElement("div");
+    const block = document.createElement("pre");
 
+    wrapper.append(block);
+
+    wrapper.style.position = "relative";
+
+    const exitButton = document.createElement("button");
+    exitButton.className =
+      "copy-code absolute right-0 m-1 rounded bg-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
+    exitButton.innerHTML = "x";
+    exitButton.setAttribute("tabindex", "0");
+    block.appendChild(exitButton);
+
+    exitButton.addEventListener("click", async () => {
+      wrapper.remove();
+    });
+
+    return wrapper;
+  }
+
+  async function attachRun(codeBlock: HTMLPreElement) {
+    const runButtonLabel = "&#9658;";
+    const runButton = document.createElement("button");
+    runButton.className =
+      "copy-code absolute right-0 m-1 rounded bg-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
+    runButton.innerHTML = runButtonLabel;
+    codeBlock.setAttribute("tabindex", "0");
+    codeBlock.appendChild(runButton);
+
+    return runButton;
+  }
+
+  async function attachRunButton() {
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const lang = codeBlock.getAttribute("data-language");
+
+      if (lang !== "python") {
+        return;
+      }
+
+      const editor = await aceify(codeBlock);
+
+      attachRun(codeBlock).then(btn => {
+        btn.addEventListener("click", async () => {
+          let code = editor.getValue();
+          if (code === undefined) {
+            throw new Error("Trying to run code that doesn't exist!");
+          }
+          const originalHTML = btn.innerHTML;
+          btn.innerHTML = `<span class="inline-block w-3 h-3 border-2 border-t-transparent rounded-full animate-spin"></span>`;
+          await runPython(code, codeBlock);
+          btn.innerHTML = originalHTML;
+        });
+      });
+    }
+  }
+  attachRunButton();
+
+  async function aceify(element: HTMLPreElement) {
+    // add an id so we can CSSify it
+    element.id = "editor";
+    element.className = "h-[300px] w-full";
+    // let the style be handled by ace
+    element.style = "";
+    // @ts-expect-error
+    var editor = window.ace.edit(element);
+    editor.setTheme("ace/theme/twilight");
+    editor.session.setMode("ace/mode/python");
+    editor.setShowPrintMargin(false);
+    editor.setOptions({
+      enableBasicAutocompletion: true,
+      enableLiveAutocompletion: true,
+    });
+
+    return editor;
+  }
+</script>

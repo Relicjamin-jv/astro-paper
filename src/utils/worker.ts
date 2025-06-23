@@ -1,6 +1,11 @@
-function getPromiseAndResolve() {
+interface PyodideResponse {
+  result: any,
+  error: any
+}
+
+function getPromiseAndResolve(): { promise: Promise<PyodideResponse>, resolve: (any) } {
   let resolve;
-  let promise = new Promise((res) => {
+  let promise: Promise<PyodideResponse> = new Promise((res) => {
     resolve = res;
   });
   return { promise, resolve };
@@ -15,7 +20,7 @@ function getId() {
 
 // Add an id to msg, send it to worker, then wait for a response with the same id.
 // When we get such a response, use it to resolve the promise.
-function requestResponse(worker, msg) {
+function requestResponse(worker: Worker, msg: Object) {
   const { promise, resolve } = getPromiseAndResolve();
   const idWorker = getId();
   worker.addEventListener("message", function listener(event) {
@@ -25,16 +30,16 @@ function requestResponse(worker, msg) {
     // This listener is done so remove it.
     worker.removeEventListener("message", listener);
     // Filter the id out of the result
-    const { id, ...rest } = event.data;
+    let { id, ...rest } = event.data;
     resolve(rest);
   });
   worker.postMessage({ id: idWorker, ...msg });
   return promise;
 }
 
-const pyodideWorker = new Worker("./pyodide.ts", { type: "module" });
+const pyodideWorker = new Worker(new URL("./pyodide.ts", import.meta.url), { type: "module" });
 
-export function asyncRun(script, context) {
+export function asyncRun(script: string, context: Object): Promise<PyodideResponse> {
   return requestResponse(pyodideWorker, {
     context,
     python: script,

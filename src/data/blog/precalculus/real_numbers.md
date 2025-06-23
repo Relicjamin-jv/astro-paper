@@ -99,3 +99,24 @@ In total there are 6 properties.
 
 Feel free to try out and test a few different numbers for $ a $ and $ b $ to see how
 the properties of negatives work.
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Prepare data
+x = np.array([0, 1, 2, 3, 4, 5])
+y = np.array([0, 2, 4, 6, 8, 10])
+
+# Create the plot
+plt.plot(x, y)
+
+# Customize the plot (optional)
+plt.xlabel("X-axis Label")
+plt.ylabel("Y-axis Label")
+plt.title("Simple Line Plot")
+plt.grid(True) # Add a grid
+
+# Display the plot
+plt.show()
+```
