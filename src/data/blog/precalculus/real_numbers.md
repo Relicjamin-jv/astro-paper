@@ -101,22 +101,39 @@ Feel free to try out and test a few different numbers for $ a $ and $ b $ to see
 the properties of negatives work.
 
 ```python
-import matplotlib.pyplot as plt
-import numpy as np
+# property 1
+a = 10
 
-# Prepare data
-x = np.array([0, 1, 2, 3, 4, 5])
-y = np.array([0, 2, 4, 6, 8, 10])
+-1 * a == -a
+```
 
-# Create the plot
-plt.plot(x, y)
+```python
+# property 2
+a = 10
 
-# Customize the plot (optional)
-plt.xlabel("X-axis Label")
-plt.ylabel("Y-axis Label")
-plt.title("Simple Line Plot")
-plt.grid(True) # Add a grid
+-1 * -a == a
+```
 
-# Display the plot
-plt.show()
+```python
+# property 3
+a = 10
+b = 20
+
+-a * b == a * (-b) == -1 * (a * b)
+```
+
+```python
+# property 5
+a = 10
+b = 20
+
+-1 * (a + b) == -a - b
+```
+
+```python
+# property 6
+a = 10
+b = 20
+
+-1 * (a - b) == b - a
 ```

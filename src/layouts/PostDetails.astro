@@ -253,7 +253,9 @@ const nextPost =
     codeElement: HTMLElement,
     context: Record<string, Object> = {}
   ) {
-    const { result, error } = await asyncRun(script, context);
+    let { result, error } = await asyncRun(script, context);
+
+    result = String(result);
 
     if (error) {
       alert("Something went wrong with executing the Python script " + error);
@@ -261,16 +263,15 @@ const nextPost =
     }
 
     const displayElement = createDisplayElement();
-    const preElement = displayElement.querySelector("pre");
     if (result.includes("base64")) {
       // img
       const image = document.createElement("img");
       image.src = result;
-      preElement?.append(image);
+      displayElement?.append(image);
     } else {
       const text = document.createElement("p");
       text.innerText = `result: ${result}`;
-      preElement?.append(text);
+      displayElement?.append(text);
     }
 
     codeElement.after(displayElement);
@@ -278,18 +279,15 @@ const nextPost =
 
   function createDisplayElement() {
     const wrapper = document.createElement("div");
-    const block = document.createElement("pre");
-
-    wrapper.append(block);
 
     wrapper.style.position = "relative";
 
     const exitButton = document.createElement("button");
     exitButton.className =
-      "copy-code absolute right-0 m-1 rounded bg-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
+      "copy-code absolute right-0 rounded bg-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
     exitButton.innerHTML = "x";
     exitButton.setAttribute("tabindex", "0");
-    block.appendChild(exitButton);
+    wrapper.appendChild(exitButton);
 
     exitButton.addEventListener("click", async () => {
       wrapper.remove();
@@ -352,6 +350,7 @@ const nextPost =
     editor.setOptions({
       enableBasicAutocompletion: true,
       enableLiveAutocompletion: true,
+      maxLines: 1000,
     });
 
     return editor;
