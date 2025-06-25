@@ -33,7 +33,9 @@ self.onmessage = async (event) => {
   // make sure loading is done
   const pyodide = await pyodideReadyPromise;
   let { id, python, context } = event.data;
-  python = overrideShow(python) // override plt.show to send base64 code back to main thread
+  if (python.includes("matplotlib")) {
+    python = overrideShow(python) // override plt.show to send base64 code back to main thread
+  }
   // Now load any packages we need, run the code, and send the result back.
   await pyodide.loadPackagesFromImports(python);
   // make a Python dictionary with the data from `context`
