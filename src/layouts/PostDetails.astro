@@ -331,6 +331,13 @@ const nextPost =
           await runPython(code, codeBlock);
           btn.innerHTML = originalHTML;
         });
+        editor.addEventListener("input", async () => {
+          if (editor.session.getLength() < 3) {
+            btn.style.display = "none";
+            return;
+          }
+          btn.style.display = "";
+        });
       });
     }
   }
