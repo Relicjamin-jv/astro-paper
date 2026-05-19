@@ -344,8 +344,7 @@ const nextPost =
 
   async function aceify(element: HTMLPreElement) {
     // add an id so we can CSSify it
-    element.id = "editor";
-    element.className = "h-[300px] w-full";
+    element.className = "h-[300px] w-full editor";
     // let the style be handled by ace
     element.style = "";
     // @ts-expect-error
