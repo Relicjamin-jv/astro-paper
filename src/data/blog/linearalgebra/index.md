@@ -1,5 +1,5 @@
 ---
-title: Linear Algebra
+title: Linear Algebra Index
 author: Collin Campbell
 pubDatetime: 2025-07-05
 slug: linearalgebra-index
@@ -8,7 +8,7 @@ draft: false
 hideEditPost: true
 tags:
   - linearalgebra
-description: Calculus Index
+description: Linear Algebra Index
 ---
 
 ## Index
