@@ -13,4 +13,4 @@ description: Linear Algebra Index
 
 ## Index
 
-...
+- [Linear Equations](/posts/linearalgebra/linearalgebra-linear-equations)
