@@ -315,7 +315,7 @@ const nextPost =
       const lang = codeBlock.getAttribute("data-language");
 
       if (lang !== "python") {
-        return;
+        continue;
       }
 
       const editor = await aceify(codeBlock);
