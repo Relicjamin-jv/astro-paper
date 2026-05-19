@@ -341,7 +341,6 @@ const nextPost =
       });
     }
   }
-  attachRunButton();
 
   async function aceify(element: HTMLPreElement) {
     // add an id so we can CSSify it
@@ -362,4 +361,11 @@ const nextPost =
 
     return editor;
   }
+
+  function initRunButtons() {
+    attachRunButton();
+  }
+
+  document.addEventListener("DOMContentLoaded", initRunButtons);
+  document.addEventListener("astro:after-swap", initRunButtons);
 </script>
