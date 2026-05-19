@@ -12,7 +12,7 @@ tags:
 description: Review chapter going over real numbers, and their application.
 ---
 
-[Pre-Calculus Index](./precalc-index)
+[Pre-Calculus Index](/posts/precalculus/precalc-index)
 
 ## Table of Contents
 

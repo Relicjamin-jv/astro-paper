@@ -19,4 +19,4 @@ and further discussions.
 
 ### Chapter 1 - Review
 
-- [Real Numbers](./precalc-real-numbers)
+- [Real Numbers](/posts/precalculus/precalc-real-numbers)
