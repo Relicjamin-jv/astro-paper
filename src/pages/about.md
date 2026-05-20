@@ -17,7 +17,3 @@ Browse the [posts](/posts) to see what I've been up to.
 
 Feel free to [reach out](mailto:collincampbell97@proton.me) — whether it's about a project,
 a collaboration, feedback, or just to say hi.
-
-<div>
-  <img src="/dev.svg" class="sm:w-1/2 mx-auto" alt="coding dev illustration">
-</div>
